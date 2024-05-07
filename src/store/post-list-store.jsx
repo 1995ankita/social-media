@@ -4,6 +4,7 @@ export const PostList = createContext({
     postList: [],
     addPost: () => { },
     deletePost: () => { },
+    addInitialPosts:() => { },
 });
 
 const PostListReducer = (currentPostList, action) => {
@@ -12,12 +13,23 @@ const PostListReducer = (currentPostList, action) => {
         newPostList=currentPostList.filter(post=>post.id!==action.payload.postId);
     }else if(action.type==="ADD_POST"){
       newPostList = [action.payload, ...currentPostList];
+    }else if(action.type==="ADD_INITIAL_POSTS"){
+      newPostList = action.payload.posts;
     }
     return newPostList;
 }
 
 const PostListProvider = ({ children }) => {
-    const [postList, dispatchPostList] = useReducer(PostListReducer, DEFAULT_POST_LIST)
+    const [postList, dispatchPostList] = useReducer(PostListReducer, [])
+    const addInitialPosts = (posts) => {
+      dispatchPostList({
+        type:"ADD_INITIAL_POSTS",
+        payload: {
+          posts
+        },
+      })
+    }
+
     const addPost = (userId, postTitle, postBody, reactions, tags) => {
       dispatchPostList({
         type:"ADD_POST",
@@ -30,10 +42,10 @@ const PostListProvider = ({ children }) => {
           tags: tags,
         },
       })
-    }
+    } 
     const deletePost = (postId) => {
         dispatchPostList({
-          type: "DELETE_POST",
+          type: "DELETE_POSTS",
           payload: {
             postId,
           },
@@ -42,27 +54,11 @@ const PostListProvider = ({ children }) => {
     return <PostList.Provider value={{
         postList,
         addPost,
-        deletePost
+        deletePost,
+        addInitialPosts
     }
     }>{children}</PostList.Provider>
 
 }
-const DEFAULT_POST_LIST = [
-    {
-      id: "1",
-      title: "Going to Mumbai",
-      body: "Hi Friends, I am going to Mumbai for my vacations. Hope to enjoy a lot. Peace out.",
-      reactions: 2,
-      userId: "user-9",
-      tags: ["vacation", "Mumbai", "Enjoying"],
-    },
-    {
-      id: "2",
-      title: "Paas ho bhai",
-      body: "4 saal ki masti k baad bhi ho gaye hain paas. Hard to believe.",
-      reactions: 15,
-      userId: "user-12",
-      tags: ["Graduating", "Unbelievable"],
-    },
-  ];
+
 export default PostListProvider;
